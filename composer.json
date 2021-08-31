@@ -1,0 +1,30 @@
+{
+    "name": "forska/think-library",
+    "description": "ThinkPHP Basic Development Library",
+    "type": "library",
+    "require": {
+        "php": ">=5.5",
+        "ext-gd": "*",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-iconv": "*",
+        "ext-openssl": "*",
+        "topthink/framework": "5.0.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "forska",
+            "email": "736523388@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload":{
+        "files": [
+            "src/common.php"
+        ],
+        "psr-4": {
+            "library\\": "src"
+        }
+    }
+}
