@@ -134,7 +134,8 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @param  string        $abstract       类名或者标识
      * @param  array|true    $vars           变量
      * @param  bool          $newInstance    是否每次创建新的实例
-     * @return object
+     * @return mixed
+     * @throws Exception
      */
     public static function get($abstract, $vars = [], $newInstance = false)
     {
@@ -161,7 +162,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      */
     public static function remove($abstract)
     {
-        return static::getInstance()->delete($abstract);
+        static::getInstance()->delete($abstract);
     }
 
     /**
@@ -171,7 +172,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      */
     public static function clear()
     {
-        return static::getInstance()->flush();
+        static::getInstance()->flush();
     }
 
     /**
@@ -203,12 +204,12 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * 绑定一个类实例当容器
      * @access public
      * @param  string           $abstract    类名或者标识
-     * @param  object|\Closure  $instance    类的实例
+     * @param  object|Closure  $instance    类的实例
      * @return $this
      */
     public function instance($abstract, $instance)
     {
-        if ($instance instanceof \Closure) {
+        if ($instance instanceof Closure) {
             $this->bind[$abstract] = $instance;
         } else {
             if (isset($this->bind[$abstract])) {
@@ -260,11 +261,11 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
 
     /**
      * 创建类的实例
-     * @access public
      * @param  string        $abstract       类名或者标识
      * @param  array|true    $vars           变量
      * @param  bool          $newInstance    是否每次创建新的实例
-     * @return object|static
+     * @return mixed
+     * @throws Exception
      */
     public function make($abstract, $vars = [], $newInstance = false)
     {
@@ -310,7 +311,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
     public function delete($abstract)
     {
         foreach ((array) $abstract as $name) {
-            $name = $this->name[$name] ?? $name;
+            $name = isset($this->name[$name]) ? $this->name[$name] : $name;
 
             if (isset($this->instances[$name])) {
                 unset($this->instances[$name]);
@@ -346,6 +347,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @param  mixed  $function 函数或者闭包
      * @param  array  $vars     参数
      * @return mixed
+     * @throws Exception
      */
     public function invokeFunction($function, $vars = [])
     {
@@ -366,6 +368,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @param  mixed   $method 方法
      * @param  array   $vars   参数
      * @return mixed
+     * @throws Exception
      */
     public function invokeMethod($method, $vars = [])
     {
@@ -410,7 +413,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @access public
      * @param  mixed $callable
      * @param  array $vars   参数
-     * @return mixed
+     * @throws Exception
      */
     public function invoke($callable, $vars = [])
     {
@@ -460,9 +463,10 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
     /**
      * 绑定参数
      * @access protected
-     * @param  \ReflectionMethod|\ReflectionFunction $reflect 反射类
-     * @param  array                                 $vars    参数
+     * @param  ReflectionMethod|ReflectionFunction $reflect 反射类
+     * @param  array                               $vars    参数
      * @return array
+     * @throws Exception
      */
     protected function bindParams($reflect, $vars = [])
     {
@@ -502,6 +506,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @param  string   $className  类名
      * @param  array    $vars       参数
      * @return mixed
+     * @throws Exception
      */
     protected function getObjectParam($className, &$vars)
     {
