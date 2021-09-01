@@ -4,7 +4,11 @@
 namespace library;
 
 
+use library\helper\InputHelper;
+use library\helper\QueryHelper;
 use library\helper\TokenHelper;
+use library\helper\ValidateHelper;
+use think\db\Query;
 use think\exception\HttpResponseException;
 use think\Hook;
 use think\Request;
@@ -15,8 +19,19 @@ abstract class Controller extends \stdClass
     /**
      * @var Request Request实例
      */
-    protected $request;
+    public $request;
 
+    /**
+     * 表单CSRF验证状态
+     * @var boolean
+     */
+    public $csrf_state = false;
+
+    /**
+     * 表单CSRF验证失败提示消息
+     * @var string
+     */
+    public $csrf_message = '';
     /**
      * Base constructor.
      * @param Request $request
@@ -27,6 +42,13 @@ abstract class Controller extends \stdClass
             $request = Request::instance();
         }
         $this->request = $request;
+
+        // 控制器注入容器
+        Container::set('library\Controller', $this);
+        if (in_array($this->request->action(), get_class_methods(__CLASS__))) {
+            $this->error('Access without permission.');
+        }
+
         // 控制器初始化
         $this->_initialize();
 
@@ -162,5 +184,38 @@ abstract class Controller extends \stdClass
             }
         }
         return true;
+    }
+
+    /**
+     * 快捷查询逻辑器
+     * @param string|Query $dbQuery
+     * @return QueryHelper
+     */
+    protected function _query($dbQuery)
+    {
+        return QueryHelper::instance()->init($dbQuery);
+    }
+
+    /**
+     * 快捷输入并验证（ 支持 规则 # 别名 ）
+     * @param array $rules 验证规则（ 验证信息数组 ）
+     * @param string $type 输入方式 ( post. 或 get. )
+     * @return array
+     */
+    protected function _vali(array $rules, $type = '')
+    {
+        return ValidateHelper::instance()->init($rules, $type);
+    }
+
+    /**
+     * 快捷输入逻辑器
+     * @param array|string $data 验证数据
+     * @param array $rule 验证规则
+     * @param array $info 验证消息
+     * @return array
+     */
+    protected function _input($data, $rule = [], $info = [])
+    {
+        return InputHelper::instance()->init($data, $rule, $info);
     }
 }

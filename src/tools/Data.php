@@ -54,7 +54,7 @@ class Data
         if (isset($case[$key])) unset($case[$key]);
         $db = is_string($dbQuery) ? Db::name($dbQuery) : $dbQuery;
         foreach ($case as $key => $value) $input[$key] = $db->raw("CASE `{$key}` " . join(' ', $value) . ' END');
-        return $db->whereIn($key, array_unique(array_column($data, $key)))->where($where)->update($input) !== false;
+        return $db->whereIn($key, array_unique(array_column($data, $key)))->where($where)->update($input) > 0;
     }
     /**
      * 一维数据数组生成数据树
@@ -126,7 +126,7 @@ class Data
     {
         $time = time() . '';
         if ($length < 10) $length = 10;
-        $string = ($time[0] + $time[1]) . substr($time, 2) . rand(0, 9);
+        $string = ($time[0] . $time[1]) . substr($time, 2) . rand(0, 9);
         while (strlen($string) < $length) $string .= rand(0, 9);
         return $string;
     }
