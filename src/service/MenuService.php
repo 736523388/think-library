@@ -52,7 +52,7 @@ class MenuService extends Service
     {
         foreach ($menus as $key => &$menu) {
             if (!empty($menu['sub'])) {
-                $menu['sub'] = $this->buildData($menu['sub'], $nodes);
+                $menu['sub'] = $this->buildData($menu['sub'], $nodes, $uuid);
             }
             if (!empty($menu['sub'])) $menu['url'] = '#';
             elseif ($menu['url'] === '#') unset($menus[$key]);

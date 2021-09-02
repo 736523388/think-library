@@ -37,7 +37,8 @@ use think\Validate;
 use think\View;
 
 /**
- * @package think
+ * Class Container
+ * @package library
  * @property Build          $build
  * @property Cache          $cache
  * @property Config         $config
@@ -264,8 +265,7 @@ class Container implements ArrayAccess, IteratorAggregate, Countable
      * @param  string        $abstract       类名或者标识
      * @param  array|true    $vars           变量
      * @param  bool          $newInstance    是否每次创建新的实例
-     * @return mixed
-     * @throws Exception
+     * @return object
      */
     public function make($abstract, $vars = [], $newInstance = false)
     {

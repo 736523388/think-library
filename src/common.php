@@ -1,5 +1,11 @@
 <?php
 
+use think\Lang;
+
+// 加载对应的语言包
+Lang::load(__DIR__ . '/lang/zh-cn.php', 'zh-cn');
+Lang::load(__DIR__ . '/lang/en-us.php', 'en-us');
+
 if (!function_exists('p')) {
     /**
      * 打印输出数据到文件
