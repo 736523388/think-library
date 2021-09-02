@@ -4,8 +4,12 @@
 namespace library;
 
 
+use library\helper\DeleteHelper;
+use library\helper\FormHelper;
 use library\helper\InputHelper;
+use library\helper\PageHelper;
 use library\helper\QueryHelper;
+use library\helper\SaveHelper;
 use library\helper\TokenHelper;
 use library\helper\ValidateHelper;
 use think\db\Query;
@@ -195,6 +199,58 @@ abstract class Controller extends \stdClass
     {
         return QueryHelper::instance()->init($dbQuery);
     }
+    /**
+     * 快捷分页逻辑器
+     * @param string|Query $dbQuery
+     * @param boolean $page 是否启用分页
+     * @param boolean $display 是否渲染模板
+     * @param boolean $total 集合分页记录数
+     * @param integer $limit 集合每页记录数
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    protected function _page($dbQuery, $page = true, $display = true, $total = false, $limit = 0)
+    {
+        return PageHelper::instance()->init($dbQuery, $page, $display, $total, $limit);
+    }
+
+    /**
+     * 快捷表单逻辑器
+     * @param string|Query $dbQuery
+     * @param string $template 模板名称
+     * @param string $field 指定数据对象主键
+     * @param array $where 额外更新条件
+     * @param array $data 表单扩展数据
+     * @return array|boolean
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     */
+    protected function _form($dbQuery, $template = '', $field = '', $where = [], $data = [])
+    {
+        return FormHelper::instance()->init($dbQuery, $template, $field, $where, $data);
+    }
+
+    /**
+     * 快捷更新逻辑器
+     * @param string|Query $dbQuery
+     * @param array $data 表单扩展数据
+     * @param string $field 数据对象主键
+     * @param array $where 额外更新条件
+     * @return boolean
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    protected function _save($dbQuery, $data = [], $field = '', $where = [])
+    {
+        return SaveHelper::instance()->init($dbQuery, $data, $field, $where);
+    }
 
     /**
      * 快捷输入并验证（ 支持 规则 # 别名 ）
@@ -217,5 +273,20 @@ abstract class Controller extends \stdClass
     protected function _input($data, $rule = [], $info = [])
     {
         return InputHelper::instance()->init($data, $rule, $info);
+    }
+
+    /**
+     * 快捷删除逻辑器
+     * @param string|Query $dbQuery
+     * @param string $field 数据对象主键
+     * @param array $where 额外更新条件
+     * @return boolean|null
+     * @return boolean|null
+     * @throws \think\Exception
+     * @throws \think\exception\PDOException
+     */
+    protected function _delete($dbQuery, $field = '', $where = [])
+    {
+        return DeleteHelper::instance()->init($dbQuery, $field, $where);
     }
 }

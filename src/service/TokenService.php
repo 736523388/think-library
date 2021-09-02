@@ -19,6 +19,7 @@ class TokenService extends Service
     public function __construct(App $app, Session $session)
     {
         parent::__construct($app);
+        $this->session = $session;
     }
 
     /**

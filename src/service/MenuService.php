@@ -27,26 +27,28 @@ class MenuService extends Service
 
     /**
      * 获取系统菜单树数据
+     * @param int $uuid 用户id
      * @return array
      * @throws \ReflectionException
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function getTree()
+    public function getTree($uuid)
     {
         $result = (array)Db::name('SystemMenu')->where(['status' => '1'])->order('sort desc,id asc')->select();
-        return $this->buildData(Data::arr2tree($result), NodeService::instance()->getMethods());
+        return $this->buildData(Data::arr2tree($result), NodeService::instance()->getMethods(), $uuid);
     }
 
     /**
      * 后台主菜单权限过滤
      * @param array $menus 当前菜单列表
      * @param array $nodes 系统权限节点
+     * @param int $uuid 系统权限节点
      * @return array
      * @throws \ReflectionException
      */
-    private function buildData($menus, $nodes)
+    private function buildData($menus, $nodes, $uuid = 0)
     {
         foreach ($menus as $key => &$menu) {
             if (!empty($menu['sub'])) {
@@ -56,9 +58,9 @@ class MenuService extends Service
             elseif ($menu['url'] === '#') unset($menus[$key]);
             elseif (preg_match('|^https?://|i', $menu['url'])) continue;
             else {
-                $node = join('/', array_slice(explode('/', preg_replace('/[\W]/', '/', $menu['url'])), 0, 3));
+                $node = $menu['node'];
                 $menu['url'] = url($menu['url']) . (empty($menu['params']) ? '' : "?{$menu['params']}");
-                if (!AdminService::instance()->check($node)) unset($menus[$key]);
+                if (!AdminService::instance()->check($uuid,$node)) unset($menus[$key]);
             }
         }
         return $menus;
