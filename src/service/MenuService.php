@@ -59,7 +59,7 @@ class MenuService extends Service
             elseif (preg_match('|^https?://|i', $menu['url'])) continue;
             else {
                 $node = $menu['node'];
-                $menu['url'] = url($menu['url']) . (empty($menu['params']) ? '' : "?{$menu['params']}");
+//                $menu['url'] = url($menu['url']) . (empty($menu['params']) ? '' : "?{$menu['params']}");
                 if (!AdminService::instance()->check($uuid,$node)) unset($menus[$key]);
             }
         }
