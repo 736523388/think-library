@@ -10,12 +10,6 @@ use think\db\Query;
 class DeleteHelper extends Helper
 {
     /**
-     * 表单额外更新条件
-     * @var array
-     */
-    protected $where;
-
-    /**
      * 数据对象主键名称
      * @var string
      */
@@ -38,24 +32,34 @@ class DeleteHelper extends Helper
      */
     public function init($dbQuery, $field = '', $where = [])
     {
-        $this->where = $where;
         $this->query = $this->buildQuery($dbQuery);
         $this->field = empty($field) ? $this->query->getPk() : $field;
-        $this->value = $this->request->post($this->field, null);
+        $this->value = $this->request->post($this->field);
+
         // 主键限制处理
-        if (!isset($this->where[$this->field]) && is_string($this->value)) {
+        if (!empty($where)) $this->query->where($where);
+        if (!isset($where[$this->field]) && is_string($this->value)) {
             $this->query->whereIn($this->field, explode(',', $this->value));
         }
         // 前置回调处理
         if (false === $this->controller->callback('_delete_filter', $this->query, $where)) {
             return null;
         }
-        // 执行删除操作
-        if (method_exists($this->query, 'getTableFields') && in_array('is_deleted', $this->query->getTableFields())) {
-            $result = $this->query->where($this->where)->update(['is_deleted' => '1']);
-        } else {
-            $result = $this->query->where($this->where)->delete();
+
+        // 阻止危险操作
+        if (!$this->query->getOptions('where')) {
+            $this->controller->error(lang('think_library_delete_error'));
         }
+        // 组装执行数据
+        $data = [];
+        if (method_exists($this->query, 'getTableFields')) {
+            $fields = $this->query->getTableFields();
+            if (in_array('deleted', $fields)) $data['deleted'] = 1;
+            if (in_array('is_deleted', $fields)) $data['is_deleted'] = 1;
+        }
+
+        // 执行删除操作
+        $result = empty($data) ? $this->query->delete() : $this->query->update($data);
         // 结果回调处理
         if (false === $this->controller->callback('_delete_result', $result)) {
             return $result;

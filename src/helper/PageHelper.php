@@ -83,7 +83,7 @@ class PageHelper extends Helper
             $result = ['list' => $this->query->select()];
         }
         if (false !== $this->controller->callback('_page_filter', $result['list']) && $this->display) {
-            return $this->controller->fetch('', $result);
+            $this->controller->fetch('', $result);
         } else {
             return $result;
         }
@@ -96,26 +96,18 @@ class PageHelper extends Helper
      */
     protected function _sort()
     {
-        switch (strtolower($this->controller->request->post('action', ''))) {
-            case 'resort':
-                foreach ($this->controller->request->post() as $key => $value) {
-                    if (preg_match('/^_\d{1,}$/', $key) && preg_match('/^\d{1,}$/', $value)) {
-                        list($where, $update) = [['id' => trim($key, '_')], ['sort' => $value]];
-                        if (1 > Db::table($this->query->getTable())->where($where)->update($update)) {
-                            return $this->controller->error(lang('think_library_sort_error'));
-                        }
+        if (strtolower($this->controller->request->post('action', '')) === 'sort') {
+            if (method_exists($this->query, 'getTableFields') && in_array('sort', $this->query->getTableFields())) {
+                $pk = $this->query->getPk() ?: 'id';
+                if ($this->controller->request->has($pk, 'post')) {
+                    $map = [$pk => $this->controller->request->post($pk, 0)];
+                    $data = ['sort' => intval($this->controller->request->post('sort', 0))];
+                    if (Db::table($this->query->getTable())->where($map)->update($data) > 0) {
+                        $this->controller->success(lang('think_library_sort_success'), '');
                     }
                 }
-                return $this->controller->success(lang('think_library_sort_success'), '');
-            case 'sort':
-                $where = $this->controller->request->post();
-                $sort = intval($this->controller->request->post('sort'));
-                unset($where['action'], $where['sort']);
-                if (Db::table($this->query->getTable())->where($where)->update(['sort' => $sort]) > 0) {
-                    return $this->controller->success(lang('think_library_sort_success'), '');
-                } else {
-                    return $this->controller->error(lang('think_library_sort_error'));
-                }
+            }
+            $this->controller->error(lang('think_library_sort_error'));
         }
     }
 }
